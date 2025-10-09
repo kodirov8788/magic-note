@@ -1,9 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import NoteEditor from "@/components/notes/NoteEditor";
-import { Database } from "@/types/database";
-
-type Note = Database["public"]["Tables"]["notes"]["Row"];
 
 interface NotePageProps {
   params: { noteId: string };

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Folder, LogOut } from "lucide-react";
 import FolderDialog from "@/components/folders/FolderDialog";
@@ -20,11 +19,7 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchFolders();
-  }, []);
-
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("folders")
@@ -41,7 +36,11 @@ export default function DashboardSidebar() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchFolders();
+  }, [fetchFolders]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

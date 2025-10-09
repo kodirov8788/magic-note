@@ -1,9 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import NotesList from "@/components/notes/NotesList";
-import { Database } from "@/types/database";
-
-type Folder = Database["public"]["Tables"]["folders"]["Row"];
 
 interface FolderPageProps {
   params: { folderId: string };

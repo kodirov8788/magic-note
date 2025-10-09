@@ -82,7 +82,7 @@ export default async function DashboardPage() {
                 <div>
                   <p className="font-medium">Create your first folder</p>
                   <p className="text-sm text-gray-600">
-                    Click "New Folder" in the sidebar to organize your notes
+                    Click &quot;New Folder&quot; in the sidebar to organize your notes
                   </p>
                 </div>
               </div>

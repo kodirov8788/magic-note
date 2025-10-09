@@ -3,10 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
+    const { id } = await params;
 
     const {
       data: { user },
@@ -19,7 +20,7 @@ export async function GET(
     const { data, error } = await supabase
       .from("notes")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -42,10 +43,11 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
+    const { id } = await params;
 
     const {
       data: { user },
@@ -57,7 +59,7 @@ export async function PATCH(
 
     const { title, content, folder_id } = await request.json();
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
 
     if (title !== undefined) {
       if (typeof title !== "string" || title.trim().length === 0) {
@@ -80,7 +82,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from("notes")
       .update(updateData)
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .select()
       .single();
@@ -104,10 +106,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
+    const { id } = await params;
 
     const {
       data: { user },
@@ -120,7 +123,7 @@ export async function DELETE(
     const { error } = await supabase
       .from("notes")
       .delete()
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) {

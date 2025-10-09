@@ -1,0 +1,7 @@
+---
+globs: ["**/*"]
+alwaysApply: true
+---
+
+login:admin@yetti.jp
+password:admin123

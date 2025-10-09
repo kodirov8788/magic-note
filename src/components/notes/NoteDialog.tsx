@@ -63,7 +63,7 @@ export default function NoteDialog({
         setContent("");
         onNoteCreated();
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);

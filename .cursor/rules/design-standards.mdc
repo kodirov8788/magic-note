@@ -1,0 +1,288 @@
+---
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Yetti Design System Standards
+
+## Component Usage Standards
+
+### Button Component
+
+**ALWAYS use the Button component for all interactive elements:**
+
+```tsx
+// ✅ CORRECT - Use Button component
+import Button from "@/components/ui/Button";
+
+<Button href="/contact" size="md">Get Started</Button>
+<Button variant="outline" size="md">Learn More</Button>
+<Button size="sm">Small Action</Button>
+
+// ❌ WRONG - Don't create custom buttons
+<button className="px-4 py-2 bg-blue-600 text-white rounded">Click me</button>
+<a className="px-6 py-3 bg-gradient-to-r from-[#6086f7] to-[#4c6ef5]">Link</a>
+```
+
+**Button Variants:**
+
+- `primary`: Gradient blue buttons (main CTAs) - Uses #6086f7 to #4c6ef5
+- `secondary`: Light gray gradient (secondary actions)
+- `outline`: Bordered buttons (tertiary actions)
+- `ghost`: Text-only buttons (subtle actions)
+
+**Button Sizes:**
+
+- `sm`: Small buttons (px-4 py-2)
+- `md`: Medium buttons (px-6 py-3) - DEFAULT
+- `lg`: Large buttons (px-8 py-4) - Use sparingly for hero CTAs only
+
+### Card Component
+
+**ALWAYS use Card components for content containers:**
+
+```tsx
+// ✅ CORRECT - Use Card component
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+
+<Card>
+  <CardHeader>Title</CardHeader>
+  <CardContent>Content here</CardContent>
+</Card>
+
+// ❌ WRONG - Don't create custom cards
+<div className="bg-white rounded-2xl p-6 shadow-sm">Content</div>
+```
+
+## Color Standards
+
+### Primary Colors
+
+**ALWAYS use these exact color values:**
+
+```css
+/* Primary Blue Gradient */
+bg-gradient-to-r from-[#6086f7] to-[#4c6ef5]
+
+/* Text Colors */
+text-[#6086f7]   /* Primary text */
+text-[#4c6ef5]   /* Secondary text */
+text-gray-600    /* Muted text */
+text-gray-900    /* Dark text */
+
+/* Background Colors */
+bg-blue-50       /* Light blue backgrounds */
+bg-gray-50       /* Light gray backgrounds */
+bg-white         /* White backgrounds */
+```
+
+### Color Usage Rules
+
+- **Primary CTAs**: Always use `from-[#6086f7] to-[#4c6ef5]` gradient
+- **Text links**: Use `text-[#6086f7]` with `hover:text-[#4c6ef5]`
+- **Borders**: Use `border-gray-100` for subtle, `border-gray-200` for defined
+- **Backgrounds**: Use `bg-gray-50` for sections, `bg-white` for cards
+
+## Spacing Standards
+
+### Padding & Margins
+
+**ALWAYS use these spacing values:**
+
+```css
+/* Section Padding */
+py-24           /* Large sections */
+py-16           /* Medium sections */
+py-12           /* Small sections */
+
+/* Container Padding */
+px-6            /* Mobile padding */
+px-8            /* Desktop padding */
+px-12           /* Large desktop padding */
+
+/* Component Spacing */
+p-6             /* Card padding */
+p-8             /* Large card padding */
+gap-8           /* Grid gaps */
+gap-6           /* Small gaps */
+gap-4           /* Button gaps */
+```
+
+### Container Widths
+
+```css
+max-w-6xl       /* Main content containers */
+max-w-4xl       /* Narrow content */
+max-w-3xl       /* Text content */
+max-w-7xl       /* Full-width sections */
+```
+
+## Border Radius Standards
+
+**ALWAYS use these border radius values:**
+
+```css
+rounded-lg      /* Small elements (buttons sm) */
+rounded-xl      /* Medium elements (buttons md) - DEFAULT */
+rounded-2xl     /* Large elements (cards, containers) */
+rounded-full    /* Pills, badges, avatars */
+```
+
+## Typography Standards
+
+### Font Sizes
+
+```css
+text-xs         /* Small labels, badges */
+text-sm         /* Small text, captions */
+text-base       /* Body text */
+text-lg         /* Large body text */
+text-xl         /* Small headings */
+text-2xl        /* Medium headings */
+text-3xl        /* Large headings */
+text-4xl        /* Extra large headings */
+text-5xl        /* Hero headings */
+text-7xl        /* Massive headings */
+text-8xl        /* Giant headings */
+```
+
+### Font Family
+
+- **Rule:** Use "Roboto" as the primary sans-serif font, with system fallbacks.
+- **Rationale:** Modern, readable, and consistent brand font with excellent web performance.
+- **Headings:** All h1-h6 elements use Roboto with font-weight: 700 (bold) for strong visual hierarchy.
+
+### Font Weights
+
+```css
+font-light      /* Hero headings */
+font-medium     /* Subheadings, buttons */
+font-semibold   /* Important text */
+font-bold       /* Emphasis */
+font-[700]      /* All headings (h1-h6) - automatically applied */
+```
+
+## Animation Standards
+
+### Transitions
+
+**ALWAYS use these transition classes:**
+
+```css
+transition-all duration-300    /* Standard transitions */
+hover:-translate-y-1           /* Card hover lift */
+hover:-translate-y-0.5         /* Button hover lift */
+group-hover:scale-105         /* Image hover scale */
+group-hover:translate-x-1     /* Arrow animations */
+```
+
+### Hover Effects
+
+```css
+hover:shadow-lg               /* Card shadows */
+hover:shadow-md               /* Button shadows */
+hover:opacity-80              /* Link opacity */
+group-hover:opacity-100       /* Reveal effects */
+```
+
+## Layout Standards
+
+### Grid Systems
+
+```css
+grid-cols-1 md:grid-cols-2 lg:grid-cols-3    /* Responsive grids */
+grid-cols-1 lg:grid-cols-2                   /* Two-column layouts */
+gap-8                                         /* Standard grid gap */
+```
+
+### Flexbox
+
+```css
+flex items-center justify-center              /* Centered content */
+flex flex-col sm:flex-row                     /* Responsive flex */
+gap-4                                         /* Standard flex gap */
+```
+
+## Component Patterns
+
+### Section Headers
+
+**ALWAYS use this pattern for section headers:**
+
+```tsx
+<div className="text-center mb-16">
+  <span className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-gray-600 mb-6">
+    Section Badge
+  </span>
+  <h2 className="text-3xl md:text-4xl font-light text-black mb-6">
+    Section Title
+  </h2>
+  <p className="text-lg text-gray-600 max-w-3xl mx-auto">Section description</p>
+</div>
+```
+
+### Link Patterns
+
+**ALWAYS use this pattern for links with arrows:**
+
+```tsx
+<Link
+  href="/path"
+  className="inline-flex items-center text-[#6086f7] font-medium hover:text-[#4c6ef5] transition-colors duration-200 group/link"
+>
+  Link Text
+  <svg
+    className="ml-2 w-4 h-4 transition-transform group-hover/link:translate-x-1"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17 8l4 4m0 0l-4 4m4-4H3"
+    />
+  </svg>
+</Link>
+```
+
+## Forbidden Patterns
+
+### ❌ NEVER DO THESE:
+
+- Create custom buttons instead of using Button component
+- Use `size="lg"` buttons unless absolutely necessary (hero CTAs only)
+- Use arbitrary color values (use only defined colors)
+- Use arbitrary spacing values (use only defined spacing)
+- Create custom cards instead of using Card component
+- Use different border radius values
+- Skip hover effects on interactive elements
+- Use different animation durations
+- Create inconsistent section headers
+
+### ✅ ALWAYS DO THESE:
+
+- Use Button component for all interactive elements
+- Use `size="md"` as the default button size
+- Use Card component for content containers
+- Follow the exact color palette
+- Use consistent spacing values
+- Apply hover effects to interactive elements
+- Use the standard section header pattern
+- Follow the established animation patterns
+
+## Implementation Checklist
+
+Before adding any new component or page:
+
+1. ✅ Does it use Button component for interactive elements?
+2. ✅ Does it use Card component for content containers?
+3. ✅ Does it follow the color standards?
+4. ✅ Does it use consistent spacing?
+5. ✅ Does it have proper hover effects?
+6. ✅ Does it follow the typography standards?
+7. ✅ Does it use the correct border radius?
+8. ✅ Does it follow the section header pattern?
+
+**Remember: Consistency is key. Every component should feel like part of the same design system.**
