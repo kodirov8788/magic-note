@@ -182,3 +182,4 @@ export function validateUUID(uuid: string): ValidationResult {
 
   return { isValid: true };
 }
+

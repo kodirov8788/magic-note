@@ -12,8 +12,11 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Notes App",
-  description: "A simple note-taking application with markdown support",
+  title: "MagicNote",
+  description: "A magical note-taking application with markdown support",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
