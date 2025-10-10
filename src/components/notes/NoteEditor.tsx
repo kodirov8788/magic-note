@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, Eye, EyeOff, Save } from "lucide-react";
 import { toast } from "sonner";
+import { debug } from "@/lib/debug";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import LineCopyButton from "./LineCopyButton";
@@ -20,11 +21,11 @@ interface NoteEditorProps {
 }
 
 export default function NoteEditor({ note }: NoteEditorProps) {
-  const [title, setTitle] = useState(note.title);
-  const [content, setContent] = useState(note.content);
-  const [isPreview, setIsPreview] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [title, setTitle] = useState<string>(note.title);
+  const [content, setContent] = useState<string>(note.content);
+  const [isPreview, setIsPreview] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const supabase = createClient();
 
@@ -53,14 +54,17 @@ export default function NoteEditor({ note }: NoteEditorProps) {
 
       if (error) {
         toast.error("Failed to save note");
-        console.error("Error saving note:", error);
+        debug.error("database", "NoteEditor: Error saving note", error);
       } else {
         toast.success("Note saved successfully");
+        debug.success("database", "NoteEditor: Note saved successfully", {
+          noteId: note.id,
+        });
         setHasChanges(false);
       }
     } catch (error) {
       toast.error("Failed to save note");
-      console.error("Error saving note:", error);
+      debug.error("database", "NoteEditor: Exception saving note", error);
     } finally {
       setIsSaving(false);
     }
@@ -72,7 +76,7 @@ export default function NoteEditor({ note }: NoteEditorProps) {
       toast.success("Note content copied to clipboard");
     } catch (error) {
       toast.error("Failed to copy content");
-      console.error("Error copying content:", error);
+      debug.error("ui", "NoteEditor: Error copying content", error);
     }
   };
 
@@ -95,7 +99,7 @@ export default function NoteEditor({ note }: NoteEditorProps) {
       toast.success("Selected text copied to clipboard");
     } catch (error) {
       toast.error("Failed to copy selected text");
-      console.error("Error copying selected text:", error);
+      debug.error("ui", "NoteEditor: Error copying selected text", error);
     }
   };
 

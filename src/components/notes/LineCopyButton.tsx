@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
+import { debug } from "@/lib/debug";
 import { toast } from "sonner";
 
 interface LineCopyButtonProps {
@@ -16,7 +17,7 @@ export default function LineCopyButton({
   lineNumber,
   className = "",
 }: LineCopyButtonProps) {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleCopy = async () => {
@@ -25,7 +26,7 @@ export default function LineCopyButton({
       toast.success(`Line ${lineNumber} copied to clipboard`);
     } catch (error) {
       toast.error("Failed to copy line");
-      console.error("Error copying line:", error);
+      debug.error("ui", "LineCopyButton: Error copying line", error);
     }
   };
 

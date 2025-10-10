@@ -3,23 +3,54 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { debug } from "@/lib/debug";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Folder, LogOut } from "lucide-react";
 import FolderDialog from "@/components/folders/FolderDialog";
 import { Database } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
 
 type Folder = Database["public"]["Tables"]["folders"]["Row"];
 
 export default function DashboardSidebar() {
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showFolderDialog, setShowFolderDialog] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showFolderDialog, setShowFolderDialog] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
 
+  // Get user first
+  useEffect(() => {
+    const getUser = async () => {
+      debug.debug("auth", "DashboardSidebar: Getting user");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      debug.info("auth", "DashboardSidebar: User retrieved", {
+        user: user ? user.email : "No user",
+      });
+    };
+    getUser();
+  }, [supabase.auth]);
+
   const fetchFolders = useCallback(async () => {
+    if (!user) {
+      debug.debug(
+        "database",
+        "DashboardSidebar: No user, skipping folder fetch"
+      );
+      return;
+    }
+
+    debug.time("Fetch Folders");
+    debug.debug("database", "DashboardSidebar: Fetching folders", {
+      userId: user.id,
+    });
+
     try {
       const { data, error } = await supabase
         .from("folders")
@@ -27,28 +58,49 @@ export default function DashboardSidebar() {
         .order("created_at", { ascending: true });
 
       if (error) {
-        console.error("Error fetching folders:", error);
+        debug.error(
+          "database",
+          "DashboardSidebar: Error fetching folders",
+          error
+        );
       } else {
+        debug.success(
+          "database",
+          "DashboardSidebar: Folders fetched successfully",
+          {
+            count: data?.length || 0,
+          }
+        );
         setFolders(data || []);
       }
     } catch (error) {
-      console.error("Error fetching folders:", error);
+      debug.error(
+        "database",
+        "DashboardSidebar: Exception fetching folders",
+        error
+      );
     } finally {
+      debug.timeEnd("Fetch Folders");
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, user]);
 
   useEffect(() => {
-    fetchFolders();
-  }, [fetchFolders]);
+    if (user) {
+      fetchFolders();
+    }
+  }, [fetchFolders, user]);
 
   const handleLogout = async () => {
+    debug.info("auth", "DashboardSidebar: User logout initiated");
     await supabase.auth.signOut();
+    debug.success("auth", "DashboardSidebar: User logged out successfully");
     router.push("/auth/login");
     router.refresh();
   };
 
   const handleFolderCreated = () => {
+    debug.info("database", "DashboardSidebar: Folder created, refreshing list");
     fetchFolders();
     setShowFolderDialog(false);
   };

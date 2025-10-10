@@ -27,10 +27,10 @@ export default function NoteDialog({
   onNoteCreated,
   folderId,
 }: NoteDialogProps) {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {

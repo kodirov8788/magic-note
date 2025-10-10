@@ -24,9 +24,9 @@ export default function FolderDialog({
   onOpenChange,
   onFolderCreated,
 }: FolderDialogProps) {
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [name, setName] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {

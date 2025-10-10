@@ -3,5 +3,5 @@ globs: ["**/*"]
 alwaysApply: true
 ---
 
-login:admin@yetti.jp
-password:admin123
+login:test@example.com
+password:testpassword123

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { debug } from "@/lib/debug";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,8 +24,8 @@ interface NotesListProps {
 
 export default function NotesList({ folderId }: NotesListProps) {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showNoteDialog, setShowNoteDialog] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showNoteDialog, setShowNoteDialog] = useState<boolean>(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -37,12 +38,15 @@ export default function NotesList({ folderId }: NotesListProps) {
         .order("updated_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching notes:", error);
+        debug.error("database", "NotesList: Error fetching notes", error);
       } else {
+        debug.success("database", "NotesList: Notes fetched successfully", {
+          count: data?.length || 0,
+        });
         setNotes(data || []);
       }
     } catch (error) {
-      console.error("Error fetching notes:", error);
+      debug.error("database", "NotesList: Exception fetching notes", error);
     } finally {
       setLoading(false);
     }

@@ -1,33 +1,43 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { debug } from "@/lib/debug";
 
 export async function middleware(request: NextRequest) {
+  debug.debug("auth", "Middleware executing", {
+    path: request.nextUrl.pathname,
+    method: request.method,
+  });
+
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    debug.error("auth", "Missing Supabase environment variables in middleware");
+    return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        supabaseResponse = NextResponse.next({
+          request,
+        });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
@@ -37,9 +47,15 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  debug.info("auth", "User authentication check", {
+    user: user ? user.email : "No user",
+    path: request.nextUrl.pathname,
+  });
+
   // Protect dashboard routes
   if (request.nextUrl.pathname.startsWith("/dashboard")) {
     if (!user) {
+      debug.warn("auth", "Redirecting unauthenticated user to login");
       // Redirect to login page
       const url = request.nextUrl.clone();
       url.pathname = "/auth/login";
@@ -50,8 +66,9 @@ export async function middleware(request: NextRequest) {
   // Redirect authenticated users away from auth pages
   if (request.nextUrl.pathname.startsWith("/auth")) {
     if (user) {
+      debug.info("auth", "Redirecting authenticated user to dashboard");
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = "/";
       return NextResponse.redirect(url);
     }
   }
