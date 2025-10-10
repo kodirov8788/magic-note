@@ -1,3 +1,5 @@
+import { ContentItem } from "./index";
+
 export interface Database {
   public: {
     Tables: {
@@ -31,6 +33,7 @@ export interface Database {
           user_id: string;
           title: string;
           content: string;
+          content_items?: ContentItem[];
           created_at: string;
           updated_at: string;
         };
@@ -40,6 +43,7 @@ export interface Database {
           user_id: string;
           title: string;
           content: string;
+          content_items?: ContentItem[];
           created_at?: string;
           updated_at?: string;
         };
@@ -49,6 +53,7 @@ export interface Database {
           user_id?: string;
           title?: string;
           content?: string;
+          content_items?: ContentItem[];
           created_at?: string;
           updated_at?: string;
         };

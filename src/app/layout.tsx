@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import ClientLayout from "@/components/layout/ClientLayout";
 
-const inter = Inter({ subsets: ["latin"] });
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  variable: "--font-roboto",
+});
 
 export const metadata: Metadata = {
   title: "Notes App",
@@ -18,8 +23,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <DashboardLayout>{children}</DashboardLayout>
+      <body className={roboto.className}>
+        <ErrorBoundary>
+          <ClientLayout>{children}</ClientLayout>
+        </ErrorBoundary>
         <Toaster />
       </body>
     </html>

@@ -23,6 +23,11 @@ export type Folder = Database["public"]["Tables"]["folders"]["Row"];
 export type FolderInsert = Database["public"]["Tables"]["folders"]["Insert"];
 export type FolderUpdate = Database["public"]["Tables"]["folders"]["Update"];
 
+// Content item types
+export type ContentItem =
+  | { type: "table-row"; id: string; key: string; value: string }
+  | { type: "text-field"; id: string; text: string };
+
 // Note types
 export type Note = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];

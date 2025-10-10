@@ -12,26 +12,37 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { debug } from "@/lib/debug";
+import { validateFolderName } from "@/lib/validation";
 
 interface FolderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onFolderCreated: () => void;
+  editingFolder?: { id: string; name: string } | null;
 }
 
 export default function FolderDialog({
   open,
   onOpenChange,
   onFolderCreated,
+  editingFolder,
 }: FolderDialogProps) {
-  const [name, setName] = useState<string>("");
+  const [name, setName] = useState<string>(editingFolder?.name || "");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+
+    // Validate folder name
+    const nameValidation = validateFolderName(name);
+    if (!nameValidation.isValid) {
+      setError(nameValidation.error!);
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -41,20 +52,37 @@ export default function FolderDialog({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setError("You must be logged in to create a folder");
+        setError("You must be logged in to manage folders");
         return;
       }
 
-      const { error } = await supabase.from("folders").insert({
-        name: name.trim(),
-        user_id: user.id,
-      });
+      if (editingFolder) {
+        // Update existing folder
+        const { error } = await supabase
+          .from("folders")
+          .update({ name: name.trim() })
+          .eq("id", editingFolder.id)
+          .eq("user_id", user.id);
 
-      if (error) {
-        setError(error.message);
+        if (error) {
+          setError(error.message);
+        } else {
+          setName("");
+          onFolderCreated();
+        }
       } else {
-        setName("");
-        onFolderCreated();
+        // Create new folder
+        const { error } = await supabase.from("folders").insert({
+          name: name.trim(),
+          user_id: user.id,
+        });
+
+        if (error) {
+          setError(error.message);
+        } else {
+          setName("");
+          onFolderCreated();
+        }
       }
     } catch {
       setError("An unexpected error occurred");
@@ -67,6 +95,8 @@ export default function FolderDialog({
     if (!newOpen) {
       setName("");
       setError("");
+    } else {
+      setName(editingFolder?.name || "");
     }
     onOpenChange(newOpen);
   };
@@ -75,9 +105,13 @@ export default function FolderDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Folder</DialogTitle>
+          <DialogTitle>
+            {editingFolder ? "Edit Folder" : "Create New Folder"}
+          </DialogTitle>
           <DialogDescription>
-            Enter a name for your new folder.
+            {editingFolder
+              ? "Update the name of your folder."
+              : "Enter a name for your new folder."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -99,7 +133,13 @@ export default function FolderDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !name.trim()}>
-              {loading ? "Creating..." : "Create Folder"}
+              {loading
+                ? editingFolder
+                  ? "Updating..."
+                  : "Creating..."
+                : editingFolder
+                ? "Update Folder"
+                : "Create Folder"}
             </Button>
           </DialogFooter>
         </form>

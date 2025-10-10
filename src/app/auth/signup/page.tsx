@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { validateEmail, validatePassword } from "@/lib/validation";
 
 export default function SignupPage() {
   const [email, setEmail] = useState<string>("");
@@ -28,21 +29,30 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
 
+    // Validate inputs
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error!);
+      setLoading(false);
+      return;
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.error!);
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       setLoading(false);
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      setLoading(false);
-      return;
-    }
-
     try {
       const { error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -109,7 +119,7 @@ export default function SignupPage() {
               Already have an account?{" "}
               <Link
                 href="/auth/login"
-                className="text-blue-600 hover:underline"
+                className="text-[#6086f7] hover:text-[#4c6ef5] hover:underline transition-colors duration-200"
               >
                 Sign in
               </Link>

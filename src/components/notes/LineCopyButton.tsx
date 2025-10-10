@@ -30,6 +30,11 @@ export default function LineCopyButton({
     }
   };
 
+  // Only show copy button for lines with content
+  if (!content.trim()) {
+    return <div className={className} />;
+  }
+
   return (
     <div
       className={`relative group ${className}`}

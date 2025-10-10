@@ -15,6 +15,7 @@ import {
 import { Plus, FileText, Calendar } from "lucide-react";
 import NoteDialog from "./NoteDialog";
 import { Database } from "@/types/database";
+import { SkeletonNoteCard } from "@/components/ui/skeleton";
 
 type Note = Database["public"]["Tables"]["notes"]["Row"];
 
@@ -70,18 +71,22 @@ export default function NotesList({ folderId }: NotesListProps) {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Notes</h2>
-        <Button onClick={() => setShowNoteDialog(true)}>
+    <div className="p-4 lg:p-6">
+      <div className="flex justify-between items-center mb-4 lg:mb-6">
+        <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
+          Notes
+        </h2>
+        <Button size="md" onClick={() => setShowNoteDialog(true)}>
           <Plus className="w-4 h-4 mr-2" />
           New Note
         </Button>
       </div>
 
       {loading ? (
-        <div className="text-center py-8">
-          <div className="text-gray-500">Loading notes...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <SkeletonNoteCard />
+          <SkeletonNoteCard />
+          <SkeletonNoteCard />
         </div>
       ) : notes.length === 0 ? (
         <div className="text-center py-12">
@@ -92,7 +97,7 @@ export default function NotesList({ folderId }: NotesListProps) {
           <p className="text-gray-600 mb-4">
             Get started by creating your first note
           </p>
-          <Button onClick={() => setShowNoteDialog(true)}>
+          <Button size="md" onClick={() => setShowNoteDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Create Note
           </Button>
@@ -102,8 +107,17 @@ export default function NotesList({ folderId }: NotesListProps) {
           {notes.map((note) => (
             <Card
               key={note.id}
-              className="hover:shadow-md transition-shadow cursor-pointer"
+              className="hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
               onClick={() => router.push(`/dashboard/notes/${note.id}`)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open note: ${note.title}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/dashboard/notes/${note.id}`);
+                }
+              }}
             >
               <CardHeader>
                 <CardTitle className="text-lg line-clamp-2">

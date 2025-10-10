@@ -32,9 +32,18 @@ export default async function FolderPage({ params }: FolderPageProps) {
   return (
     <div className="flex h-full">
       <div className="flex-1 flex flex-col">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900">{folder.name}</h1>
-          <p className="text-gray-600">Manage your notes in this folder</p>
+        <div className="py-8 lg:py-16 px-6 border-b border-gray-200">
+          <div className="text-center mb-8 lg:mb-16">
+            <span className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-gray-600 mb-4 lg:mb-6">
+              Folder
+            </span>
+            <h1 className="text-2xl lg:text-3xl xl:text-4xl font-light text-black mb-4 lg:mb-6">
+              {folder.name}
+            </h1>
+            <p className="text-base lg:text-lg text-gray-600 max-w-3xl mx-auto">
+              Manage your notes in this folder
+            </p>
+          </div>
         </div>
         <div className="flex-1 overflow-hidden">
           <NotesList folderId={params.folderId} />
