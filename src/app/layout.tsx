@@ -12,7 +12,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "MagicNote",
+  title: "copy-note",
   description: "A magical note-taking application with markdown support",
   icons: {
     icon: "/favicon.png",
