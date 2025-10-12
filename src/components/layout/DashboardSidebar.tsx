@@ -423,7 +423,7 @@ export default function DashboardSidebar({
       >
         {/* Header with close button */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">MagicNote</h1>
+          <h1 className="text-xl font-semibold text-gray-900">copy-note</h1>
           <Button
             variant="ghost"
             size="md"
