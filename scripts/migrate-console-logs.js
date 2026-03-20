@@ -14,10 +14,10 @@ const __dirname = path.dirname(__filename);
 
 // Patterns to match console statements
 const consolePatterns = [
-  { pattern: /console\.log\(/g, replacement: 'debug.info('general', ' },
-  { pattern: /console\.error\(/g, replacement: 'debug.error('general', ' },
-  { pattern: /console\.warn\(/g, replacement: 'debug.warn('general', ' },
-  { pattern: /console\.debug\(/g, replacement: 'debug.debug('general', ' },
+  { pattern: /console\.log\(/g, replacement: "debug.info('general', " },
+  { pattern: /console\.error\(/g, replacement: "debug.error('general', " },
+  { pattern: /console\.warn\(/g, replacement: "debug.warn('general', " },
+  { pattern: /console\.debug\(/g, replacement: "debug.debug('general', " },
 ];
 
 // Categories based on file paths

@@ -23,38 +23,66 @@ describe("Supabase Client", () => {
     expect(() => createClient()).not.toThrow();
     expect(createBrowserClient).toHaveBeenCalledWith(
       "https://test.supabase.co",
-      "test-anon-key"
+      "test-anon-key",
+      expect.objectContaining({
+        auth: expect.objectContaining({
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        }),
+      })
     );
   });
 
-  it("throws error when NEXT_PUBLIC_SUPABASE_URL is missing", () => {
+  it("uses placeholder values during test runs when NEXT_PUBLIC_SUPABASE_URL is missing", () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
+    const { createBrowserClient } = require("@supabase/ssr");
+    createBrowserClient.mockReturnValue({});
 
-    expect(() => createClient()).toThrow(
-      "Missing Supabase environment variables. Please check your .env.local file."
+    expect(() => createClient()).not.toThrow();
+    expect(createBrowserClient).toHaveBeenCalledWith(
+      "https://placeholder.supabase.co",
+      "test-anon-key",
+      expect.any(Object)
     );
   });
 
-  it("throws error when NEXT_PUBLIC_SUPABASE_ANON_KEY is missing", () => {
+  it("uses placeholder values during test runs when NEXT_PUBLIC_SUPABASE_ANON_KEY is missing", () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+    const { createBrowserClient } = require("@supabase/ssr");
+    createBrowserClient.mockReturnValue({});
 
-    expect(() => createClient()).toThrow(
-      "Missing Supabase environment variables. Please check your .env.local file."
+    expect(() => createClient()).not.toThrow();
+    expect(createBrowserClient).toHaveBeenCalledWith(
+      "https://test.supabase.co",
+      "placeholder-anon-key",
+      expect.any(Object)
     );
   });
 
-  it("throws error when both environment variables are missing", () => {
-    expect(() => createClient()).toThrow(
-      "Missing Supabase environment variables. Please check your .env.local file."
+  it("uses placeholder values during test runs when both environment variables are missing", () => {
+    const { createBrowserClient } = require("@supabase/ssr");
+    createBrowserClient.mockReturnValue({});
+
+    expect(() => createClient()).not.toThrow();
+    expect(createBrowserClient).toHaveBeenCalledWith(
+      "https://placeholder.supabase.co",
+      "placeholder-anon-key",
+      expect.any(Object)
     );
   });
 
-  it("throws error when environment variables are empty strings", () => {
+  it("uses placeholder values during test runs when environment variables are empty strings", () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "";
+    const { createBrowserClient } = require("@supabase/ssr");
+    createBrowserClient.mockReturnValue({});
 
-    expect(() => createClient()).toThrow(
-      "Missing Supabase environment variables. Please check your .env.local file."
+    expect(() => createClient()).not.toThrow();
+    expect(createBrowserClient).toHaveBeenCalledWith(
+      "https://placeholder.supabase.co",
+      "placeholder-anon-key",
+      expect.any(Object)
     );
   });
 });

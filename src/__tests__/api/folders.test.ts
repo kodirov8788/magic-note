@@ -1,41 +1,46 @@
-import { NextRequest } from "next/server";
+jest.mock("next/server", () => ({
+  NextResponse: {
+    json: (body: unknown, init?: { status?: number }) => ({
+      status: init?.status ?? 200,
+      json: async () => body,
+    }),
+  },
+}));
+
 import { GET, POST } from "@/app/api/folders/route";
 import { createClient } from "@/lib/supabase/server";
 
-// Mock Supabase server client
-jest.mock("@/lib/supabase/server", () => ({
-  createClient: jest.fn(() => ({
-    auth: {
-      getUser: jest.fn(),
-    },
-    from: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      single: jest.fn(),
-    })),
-  })),
-}));
+const createFoldersQuery = () => ({
+  select: jest.fn().mockReturnThis(),
+  insert: jest.fn().mockReturnThis(),
+  eq: jest.fn().mockReturnThis(),
+  order: jest.fn().mockResolvedValue({
+    data: [],
+    error: null,
+  }),
+  single: jest.fn().mockResolvedValue({
+    data: null,
+    error: null,
+  }),
+});
 
 const mockSupabase = {
   auth: {
     getUser: jest.fn(),
   },
-  from: jest.fn(() => ({
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    single: jest.fn(),
-  })),
+  from: jest.fn(),
 };
+
+jest.mock("@/lib/supabase/server", () => ({
+  createClient: jest.fn(() => mockSupabase),
+}));
 
 (createClient as jest.Mock).mockResolvedValue(mockSupabase);
 
 describe("/api/folders", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSupabase.from.mockReturnValue(createFoldersQuery());
   });
 
   describe("GET", () => {
@@ -49,7 +54,7 @@ describe("/api/folders", () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
       });
-      mockSupabase.from().select().eq().order().mockResolvedValue({
+      mockSupabase.from().order.mockResolvedValue({
         data: mockFolders,
         error: null,
       });
@@ -59,6 +64,7 @@ describe("/api/folders", () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual(mockFolders);
+      expect(mockSupabase.from).toHaveBeenCalledWith("folders");
       expect(mockSupabase.from().select).toHaveBeenCalledWith("*");
       expect(mockSupabase.from().eq).toHaveBeenCalledWith(
         "user_id",
@@ -83,15 +89,10 @@ describe("/api/folders", () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
       });
-      mockSupabase
-        .from()
-        .select()
-        .eq()
-        .order()
-        .mockResolvedValue({
-          data: null,
-          error: { message: "Database connection failed" },
-        });
+      mockSupabase.from().order.mockResolvedValue({
+        data: null,
+        error: { message: "Database connection failed" },
+      });
 
       const response = await GET();
       const data = await response.json();
@@ -113,18 +114,16 @@ describe("/api/folders", () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
       });
-      mockSupabase.from().insert().select().single().mockResolvedValue({
+      mockSupabase.from().single.mockResolvedValue({
         data: mockFolder,
         error: null,
       });
 
-      const request = new NextRequest("http://localhost:3000/api/folders", {
-        method: "POST",
-        body: JSON.stringify({ name: "New Folder" }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = {
+        json: async () => ({ name: "New Folder" }),
+      };
 
-      const response = await POST(request);
+      const response = await POST(request as never);
       const data = await response.json();
 
       expect(response.status).toBe(201);
@@ -140,13 +139,11 @@ describe("/api/folders", () => {
         data: { user: null },
       });
 
-      const request = new NextRequest("http://localhost:3000/api/folders", {
-        method: "POST",
-        body: JSON.stringify({ name: "New Folder" }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = {
+        json: async () => ({ name: "New Folder" }),
+      };
 
-      const response = await POST(request);
+      const response = await POST(request as never);
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -159,13 +156,11 @@ describe("/api/folders", () => {
         data: { user: mockUser },
       });
 
-      const request = new NextRequest("http://localhost:3000/api/folders", {
-        method: "POST",
-        body: JSON.stringify({ name: "" }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = {
+        json: async () => ({ name: "" }),
+      };
 
-      const response = await POST(request);
+      const response = await POST(request as never);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -183,19 +178,16 @@ describe("/api/folders", () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
       });
-      mockSupabase.from().insert().select().single().mockResolvedValue({
+      mockSupabase.from().single.mockResolvedValue({
         data: mockFolder,
         error: null,
       });
 
-      const request = new NextRequest("http://localhost:3000/api/folders", {
-        method: "POST",
-        body: JSON.stringify({ name: "  Trimmed Folder  " }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const request = {
+        json: async () => ({ name: "  Trimmed Folder  " }),
+      };
 
-      const response = await POST(request);
-      const data = await response.json();
+      const response = await POST(request as never);
 
       expect(response.status).toBe(201);
       expect(mockSupabase.from().insert).toHaveBeenCalledWith({
@@ -209,23 +201,16 @@ describe("/api/folders", () => {
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: mockUser },
       });
-      mockSupabase
-        .from()
-        .insert()
-        .select()
-        .single()
-        .mockResolvedValue({
-          data: null,
-          error: { message: "Database constraint violation" },
-        });
-
-      const request = new NextRequest("http://localhost:3000/api/folders", {
-        method: "POST",
-        body: JSON.stringify({ name: "New Folder" }),
-        headers: { "Content-Type": "application/json" },
+      mockSupabase.from().single.mockResolvedValue({
+        data: null,
+        error: { message: "Database constraint violation" },
       });
 
-      const response = await POST(request);
+      const request = {
+        json: async () => ({ name: "New Folder" }),
+      };
+
+      const response = await POST(request as never);
       const data = await response.json();
 
       expect(response.status).toBe(500);

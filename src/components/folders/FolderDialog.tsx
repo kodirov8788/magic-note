@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { debug } from "@/lib/debug";
 import { validateFolderName } from "@/lib/validation";
 
 interface FolderDialogProps {

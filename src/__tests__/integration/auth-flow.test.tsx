@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createClient } from "@/lib/supabase/client";
 import LoginPage from "@/app/auth/login/page";
@@ -40,10 +40,12 @@ describe("Authentication Flow", () => {
     it("renders login form", () => {
       render(<LoginPage />);
 
-      expect(screen.getByText("Login to Magic Note")).toBeInTheDocument();
+      expect(screen.getAllByText("Sign In").length).toBeGreaterThan(0);
       expect(screen.getByPlaceholderText("Email")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
-      expect(screen.getByText("Sign In")).toBeInTheDocument();
+      expect(
+        screen.getByText("Enter your email and password to access your notes")
+      ).toBeInTheDocument();
     });
 
     it("submits form with valid credentials", async () => {
@@ -57,7 +59,7 @@ describe("Authentication Flow", () => {
 
       const emailInput = screen.getByPlaceholderText("Email");
       const passwordInput = screen.getByPlaceholderText("Password");
-      const submitButton = screen.getByText("Sign In");
+      const submitButton = screen.getByRole("button", { name: "Sign In" });
 
       await user.type(emailInput, "test@example.com");
       await user.type(passwordInput, "password123");
@@ -70,7 +72,7 @@ describe("Authentication Flow", () => {
         });
       });
 
-      expect(mockPush).toHaveBeenCalledWith("/dashboard");
+      expect(mockPush).toHaveBeenCalledWith("/");
       expect(mockRefresh).toHaveBeenCalled();
     });
 
@@ -85,7 +87,7 @@ describe("Authentication Flow", () => {
 
       const emailInput = screen.getByPlaceholderText("Email");
       const passwordInput = screen.getByPlaceholderText("Password");
-      const submitButton = screen.getByText("Sign In");
+      const submitButton = screen.getByRole("button", { name: "Sign In" });
 
       await user.type(emailInput, "test@example.com");
       await user.type(passwordInput, "wrongpassword");
@@ -117,7 +119,7 @@ describe("Authentication Flow", () => {
 
       const emailInput = screen.getByPlaceholderText("Email");
       const passwordInput = screen.getByPlaceholderText("Password");
-      const submitButton = screen.getByText("Sign In");
+      const submitButton = screen.getByRole("button", { name: "Sign In" });
 
       await user.type(emailInput, "test@example.com");
       await user.type(passwordInput, "password123");
@@ -131,7 +133,7 @@ describe("Authentication Flow", () => {
       const user = userEvent.setup();
       render(<LoginPage />);
 
-      const submitButton = screen.getByText("Sign In");
+      const submitButton = screen.getByRole("button", { name: "Sign In" });
       await user.click(submitButton);
 
       // HTML5 validation should prevent submission
@@ -148,7 +150,7 @@ describe("Authentication Flow", () => {
 
       const emailInput = screen.getByPlaceholderText("Email");
       const passwordInput = screen.getByPlaceholderText("Password");
-      const submitButton = screen.getByText("Sign In");
+      const submitButton = screen.getByRole("button", { name: "Sign In" });
 
       await user.type(emailInput, "test@example.com");
       await user.type(passwordInput, "password123");

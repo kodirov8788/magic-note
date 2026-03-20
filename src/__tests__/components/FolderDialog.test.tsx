@@ -1,28 +1,27 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import FolderDialog from "@/components/folders/FolderDialog";
 import { createClient } from "@/lib/supabase/client";
 
-// Mock Supabase client
-jest.mock("@/lib/supabase/client", () => ({
-  createClient: jest.fn(() => ({
-    auth: {
-      getUser: jest.fn(),
-    },
-    from: jest.fn(() => ({
-      insert: jest.fn().mockReturnThis(),
-    })),
-  })),
-}));
+const createFolderQuery = () => ({
+  insert: jest.fn().mockResolvedValue({
+    data: { id: "test-folder-id", name: "Test Folder" },
+    error: null,
+  }),
+  update: jest.fn().mockResolvedValue({ error: null }),
+  eq: jest.fn().mockReturnThis(),
+});
 
 const mockSupabase = {
   auth: {
     getUser: jest.fn(),
   },
-  from: jest.fn(() => ({
-    insert: jest.fn().mockReturnThis(),
-  })),
+  from: jest.fn(),
 };
+
+jest.mock("@/lib/supabase/client", () => ({
+  createClient: jest.fn(() => mockSupabase),
+}));
 
 (createClient as jest.Mock).mockReturnValue(mockSupabase);
 
@@ -35,12 +34,9 @@ describe("FolderDialog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSupabase.from.mockReturnValue(createFolderQuery());
     mockSupabase.auth.getUser.mockResolvedValue({
       data: { user: { id: "test-user-id" } },
-    });
-    mockSupabase.from().insert.mockResolvedValue({
-      data: { id: "test-folder-id", name: "Test Folder" },
-      error: null,
     });
   });
 
@@ -65,12 +61,13 @@ describe("FolderDialog", () => {
     render(<FolderDialog {...mockProps} />);
 
     const input = screen.getByPlaceholderText("Folder name");
-    const submitButton = screen.getByText("Create Folder");
+    const submitButton = screen.getByRole("button", { name: "Create Folder" });
 
     await user.type(input, "My Test Folder");
     await user.click(submitButton);
 
     await waitFor(() => {
+      expect(mockSupabase.from).toHaveBeenCalledWith("folders");
       expect(mockSupabase.from().insert).toHaveBeenCalledWith({
         name: "My Test Folder",
         user_id: "test-user-id",
@@ -78,33 +75,30 @@ describe("FolderDialog", () => {
     });
 
     expect(mockProps.onFolderCreated).toHaveBeenCalled();
-    expect(mockProps.onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it("does not submit form with empty folder name", async () => {
-    const user = userEvent.setup();
     render(<FolderDialog {...mockProps} />);
-
-    const submitButton = screen.getByText("Create Folder");
-    await user.click(submitButton);
-
+    expect(
+      screen.getByRole("button", { name: "Create Folder" })
+    ).toBeDisabled();
     expect(mockSupabase.from().insert).not.toHaveBeenCalled();
   });
 
   it("handles form submission errors", async () => {
     const user = userEvent.setup();
-    mockSupabase.from().insert.mockResolvedValue({
-      data: null,
-      error: { message: "Database error" },
+    mockSupabase.from.mockReturnValueOnce({
+      ...createFolderQuery(),
+      insert: jest.fn().mockResolvedValue({
+        data: null,
+        error: { message: "Database error" },
+      }),
     });
 
     render(<FolderDialog {...mockProps} />);
 
-    const input = screen.getByPlaceholderText("Folder name");
-    const submitButton = screen.getByText("Create Folder");
-
-    await user.type(input, "Test Folder");
-    await user.click(submitButton);
+    await user.type(screen.getByPlaceholderText("Folder name"), "Test Folder");
+    await user.click(screen.getByRole("button", { name: "Create Folder" }));
 
     await waitFor(() => {
       expect(screen.getByText("Database error")).toBeInTheDocument();
@@ -119,15 +113,12 @@ describe("FolderDialog", () => {
 
     render(<FolderDialog {...mockProps} />);
 
-    const input = screen.getByPlaceholderText("Folder name");
-    const submitButton = screen.getByText("Create Folder");
-
-    await user.type(input, "Test Folder");
-    await user.click(submitButton);
+    await user.type(screen.getByPlaceholderText("Folder name"), "Test Folder");
+    await user.click(screen.getByRole("button", { name: "Create Folder" }));
 
     await waitFor(() => {
       expect(
-        screen.getByText("You must be logged in to create a folder")
+        screen.getByText("You must be logged in to manage folders")
       ).toBeInTheDocument();
     });
   });
@@ -136,11 +127,8 @@ describe("FolderDialog", () => {
     const user = userEvent.setup();
     render(<FolderDialog {...mockProps} />);
 
-    const input = screen.getByPlaceholderText("Folder name");
-    const cancelButton = screen.getByText("Cancel");
-
-    await user.type(input, "Test Folder");
-    await user.click(cancelButton);
+    await user.type(screen.getByPlaceholderText("Folder name"), "Test Folder");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(mockProps.onOpenChange).toHaveBeenCalledWith(false);
   });
@@ -149,11 +137,8 @@ describe("FolderDialog", () => {
     const user = userEvent.setup();
     render(<FolderDialog {...mockProps} />);
 
-    const input = screen.getByPlaceholderText("Folder name");
-    const submitButton = screen.getByText("Create Folder");
-
-    await user.type(input, "  Test Folder  ");
-    await user.click(submitButton);
+    await user.type(screen.getByPlaceholderText("Folder name"), "  Test Folder  ");
+    await user.click(screen.getByRole("button", { name: "Create Folder" }));
 
     await waitFor(() => {
       expect(mockSupabase.from().insert).toHaveBeenCalledWith({

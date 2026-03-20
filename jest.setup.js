@@ -26,10 +26,6 @@ Object.assign(navigator, {
   },
 });
 
-// Mock Request and Response for API tests
-global.Request = jest.fn();
-global.Response = jest.fn();
-
 // Mock toast notifications
 jest.mock("sonner", () => ({
   toast: {
