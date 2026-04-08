@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Copy, Save, Table, Type, Check, AlertCircle } from "lucide-react";
+import { Copy, Save, Table, Type, Check, AlertCircle, FileText, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { debug } from "@/lib/debug";
 import MixedContentEditor from "./MixedContentEditor";
@@ -88,6 +88,21 @@ export default function NoteEditor({ note, onNoteSaved }: NoteEditorProps) {
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const supabase = createClient();
+
+  // Statistics calculation
+  const stats = useMemo(() => {
+    const textContent = contentItems
+      .map((item) => {
+        if (item.type === "table-row") return `${item.key} ${item.value}`;
+        return item.text || "";
+      })
+      .join(" ");
+
+    const words = textContent.trim() === "" ? 0 : textContent.trim().split(/\s+/).length;
+    const readingTime = Math.max(1, Math.ceil(words / 200)); // Average 200 wpm
+
+    return { words, readingTime };
+  }, [contentItems]);
 
   useEffect(() => {
     setTitle(note.title);
@@ -257,6 +272,18 @@ export default function NoteEditor({ note, onNoteSaved }: NoteEditorProps) {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+              {/* Stats Badge */}
+              <div className="hidden lg:flex items-center gap-3 px-3 py-1 bg-gray-50 border border-gray-100 rounded-full text-[10px] font-medium text-gray-400 mr-2 uppercase tracking-wider">
+                <span className="flex items-center gap-1">
+                  <FileText className="w-3 h-3" />
+                  {stats.words} words
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {stats.readingTime} min read
+                </span>
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
